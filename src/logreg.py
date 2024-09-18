@@ -1,30 +1,31 @@
 import numpy as np
-import pandas as pd
-from util import loadDataset
-
-loans_train = './data/loans.train'
-
-ltrain_data, ltrain_targets = loadDataset(loans_train)
-loans_train_features = pd.DataFrame(data=ltrain_data)
-print(loans_train_features.head())
-print(ltrain_data)
-print(ltrain_targets)
-
-# Logistic Regression
-def LogisticReg(lltrain_targets, loans_train_features):
-    pass
+from util import *
 
 
-# Sigmoid Function
-def sigmoid(n):
-    return 1/(1+np.exp(n))
+class LogisticRegression():
 
-# Calculates the Error value
-def Error(value):
-    np.sum(sigmoid(np.dot(weights, features)))
+    def __init__(self):
+        self.weights = []
 
-# Gradient Descent Algorithm
-def gradient_descent(learning_rate):
-    converged = False
-    while not converged:
-        new_weight = curr_weight + learning_rate * (np.gradient())
+
+    # Get the weights needed to calculate the answer
+    def fit(self, X,T):
+        shape = X.shape
+        value = X.shape[1] 
+        self.weights = np.random.randn(value, 2)
+
+    # Using dataset X, and weights from fit to get value of Y
+    def predict(self, X):
+        calc = X @ self.weights
+        print(calc)
+        return calc
+    
+    def error(self, T, Y):
+        return -np.sum(T * np.log(Y) + (1-T) * np.log(1-Y))
+    
+    def GradientDescent(self, X, T, Y, lr=0.03):
+        prob = softmax(Y)
+        value = prob - T
+        grad = X.T @ value 
+        self.weights = self.weights - lr * grad
+        
