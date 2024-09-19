@@ -1,27 +1,26 @@
 from util import loadDataset, toHotEncoding, accuracy
 from logreg import LogisticRegression
 import numpy as np
+from sklearn.preprocessing import StandardScaler
 
 def process_dataset(train_path, valid_path, dataset_name):
     print(f"\nProcessing {dataset_name} dataset...")
     
-    # Load training data
     X, T = loadDataset(train_path)
     T = toHotEncoding(T, 2)
-        
-    # Train logistic regression model
+    
+    scaler = StandardScaler()
+    X = scaler.fit_transform(X)
     m = LogisticRegression()
     m.fit(X, T)
 
-    # Load validation data
     X2, T2 = loadDataset(valid_path)
     T2 = toHotEncoding(T2, 2)
-    
-    # Predict on validation data (return class labels, not one-hot)
+    X2 = scaler.fit_transform(X2)
+
     Y2 = m.predict(X2)
     
-    # Calculate accuracy (T2 should be class labels, so convert it)
-    accuracy_score = accuracy(np.argmax(T2, axis=1), Y2)
+    accuracy_score = accuracy(T2, Y2)
     print(f'Accuracy for {dataset_name} dataset: {accuracy_score}')
 
 def main():
