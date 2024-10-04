@@ -1,27 +1,34 @@
 from util import loadDataset, toHotEncoding, accuracy
 from logreg import LogisticRegression
+from mlp import MultilayerPerceptron
 import numpy as np
-from sklearn.preprocessing import StandardScaler
 
-def process_dataset(train_path, valid_path, dataset_name):
-    print(f"\nProcessing {dataset_name} dataset...")
-    
-    X, T = loadDataset(train_path)
-    T = toHotEncoding(T, 2)
-    
-    scaler = StandardScaler()
-    X = scaler.fit_transform(X)
-    m = LogisticRegression()
-    m.fit(X, T)
+def process_dataset(train_path, valid_path, dataset_name, model_type='mlp'):
+    print(f"\nProcessing {dataset_name} dataset with {model_type}...")
 
-    X2, T2 = loadDataset(valid_path)
-    T2 = toHotEncoding(T2, 2)
-    X2 = scaler.fit_transform(X2)
+    # Load and preprocess training data
+    X_train, T_train = loadDataset(train_path)
+    T_train = toHotEncoding(T_train, 2)  # Ensure T_train is one-hot encoded
 
-    Y2 = m.predict(X2)
-    
-    accuracy_score = accuracy(T2, Y2)
-    print(f'Accuracy for {dataset_name} dataset: {accuracy_score}')
+    # Initialize and train the model
+    if model_type == 'mlp':
+        model = MultilayerPerceptron()
+        model.fit(X_train, T_train)
+        model.save(f"{dataset_name.lower()}.model")
+    elif model_type == 'logreg':
+        model = LogisticRegression()
+        model.fit(X_train, T_train)
+
+    # Load and preprocess validation data
+    X_valid, T_valid = loadDataset(valid_path)
+    T_valid = toHotEncoding(T_valid, 2)  # Ensure T_valid is one-hot encoded
+
+    # Make predictions on validation data
+    Y_valid = model.predict(X_valid)
+
+    # Calculate accuracy
+    accuracy_score = accuracy(T_valid, Y_valid)
+    print(f'Accuracy for {dataset_name} dataset using {model_type}: {accuracy_score}')
 
 def main():
     # Paths for the "water" dataset
@@ -32,9 +39,13 @@ def main():
     loans_train = './data/loans.train'
     loans_valid = './data/loans.val'
 
-    # Process both datasets
-    process_dataset(water_train, water_valid, "Water")
-    process_dataset(loans_train, loans_valid, "Loans")
-    
+    print("Using Logistic Regression:")
+    process_dataset(water_train, water_valid, "Water", model_type='logreg')
+    process_dataset(loans_train, loans_valid, "Loans", model_type='logreg')
+
+    print("\nUsing Multilayer Perceptron:")
+    process_dataset(water_train, water_valid, "Water", model_type='mlp')
+    process_dataset(loans_train, loans_valid, "Loans", model_type='mlp')
+
 if __name__ == '__main__':
     main()
